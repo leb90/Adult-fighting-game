@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FYTEFANS - Ultimate Fighter</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/src/styles.css" />
+</head>
+<body>
+  <!-- Start Screen -->
+  <div id="startScreen">
+    <div class="logo-container">
+      <h1 class="main-logo">FYTEFANS</h1>
+      <p class="tagline">ULTIMATE FIGHTER</p>
+    </div>
+    <div class="start-content">
+      <button id="startBtn" class="neon-btn">
+        <span>START FIGHT</span>
+      </button>
+      <div class="controls-info">
+        <div class="player-controls">
+          <h3>PLAYER 1</h3>
+          <p>Move: <span class="key">A</span> <span class="key">D</span></p>
+          <p>Jump: <span class="key">W</span></p>
+          <p>Attack: <span class="key">SPACE</span></p>
+          <p>ULTIMATE: <span class="key">Q</span></p>
+        </div>
+        <div class="player-controls">
+          <h3>PLAYER 2</h3>
+          <p>Move: <span class="key">&larr;</span> <span class="key">&rarr;</span></p>
+          <p>Jump: <span class="key">&uarr;</span></p>
+          <p>Attack: <span class="key">&darr;</span></p>
+          <p>ULTIMATE: <span class="key">/</span></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Game Container -->
+  <div id="gameContainer" style="display: none;">
+    <div class="game-wrapper">
+      <!-- HUD -->
+      <div class="hud">
+        <!-- Player 1 Section -->
+        <div class="player-section p1">
+          <div class="player-name">PLAYER 1</div>
+          <div class="health-container">
+            <div class="health-bg"></div>
+            <div id="playerHealth" class="health-bar"></div>
+          </div>
+          <div class="ultimate-container">
+            <div class="ultimate-label">ULTIMATE</div>
+            <div class="ultimate-bg">
+              <div id="playerUltimate" class="ultimate-bar"></div>
+            </div>
+            <div id="playerUltReady" class="ult-ready">READY!</div>
+          </div>
+        </div>
+
+        <!-- Timer -->
+        <div class="timer-section">
+          <div id="timer" class="timer">60</div>
+          <div class="brand-badge">FYTEFANS</div>
+        </div>
+
+        <!-- Player 2 Section -->
+        <div class="player-section p2">
+          <div class="player-name">PLAYER 2</div>
+          <div class="health-container">
+            <div class="health-bg"></div>
+            <div id="enemyHealth" class="health-bar"></div>
+          </div>
+          <div class="ultimate-container">
+            <div class="ultimate-label">ULTIMATE</div>
+            <div class="ultimate-bg">
+              <div id="enemyUltimate" class="ultimate-bar"></div>
+            </div>
+            <div id="enemyUltReady" class="ult-ready">READY!</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Game Display Text -->
+      <div id="displayText" class="display-text">
+        <span class="winner-text"></span>
+        <button id="restartBtn" class="neon-btn small">FIGHT AGAIN</button>
+      </div>
+
+      <!-- Ultimate Animation Overlay -->
+      <div id="ultimateOverlay" class="ultimate-overlay">
+        <div class="ultimate-text">ULTIMATE!</div>
+      </div>
+
+      <!-- Canvas -->
+      <canvas id="gameCanvas"></canvas>
+
+      <!-- Combo Display -->
+      <div id="comboP1" class="combo-display left"></div>
+      <div id="comboP2" class="combo-display right"></div>
+    </div>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
