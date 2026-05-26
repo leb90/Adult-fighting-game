@@ -3,7 +3,7 @@ import { defineConfig } from 'vite'
 export default defineConfig({
   server: {
     port: 3000,
-    allowedHosts: ['sb-5uahjl5o7m5b.vercel.run', 'localhost', '127.0.0.1']
+    allowedHosts: ['localhost', '127.0.0.1', '.vercel.run']
   },
   build: {
     outDir: 'dist'
