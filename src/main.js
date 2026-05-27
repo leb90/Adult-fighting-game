@@ -31,13 +31,14 @@ canvas.height = 576
 c.imageSmoothingEnabled = false
 
 const gravity = 0.7
+const BASE    = import.meta.env.BASE_URL
 
 // ── Audio ─────────────────────────────────────────────────────────────────────
-const fightMusic = new Audio('/sound/FightSong.mp3')
+const fightMusic = new Audio(`${BASE}sound/FightSong.mp3`)
 fightMusic.loop   = true
 fightMusic.volume = 0.5
 
-const punchSfx = new Audio('/sound/punch.mp3')
+const punchSfx = new Audio(`${BASE}sound/punch.mp3`)
 punchSfx.volume = 0.7
 
 function playPunch() {
@@ -62,39 +63,39 @@ let playerCharacter = 'ruki'
 
 // ── Sprite configs ────────────────────────────────────────────────────────────
 const RUKI_CFG = {
-  imageSrc:     '/img/Ruki/Idle.png',
+  imageSrc:     `${BASE}img/Ruki/Idle.png`,
   framesMax:    4,
   scale:        2.0,
   offset:       { x: 160, y: 145 },
   frameDuration: 115,
   facingRight:  false,
   sprites: {
-    idle:    { imageSrc: '/img/Ruki/Idle.png',      framesMax: 4 },
-    run:     { imageSrc: '/img/Ruki/Run.png',       framesMax: 8 },
-    jump:    { imageSrc: '/img/Ruki/Jump.png',      framesMax: 2 },
-    fall:    { imageSrc: '/img/Ruki/Fall.png',      framesMax: 2 },
-    attack1: { imageSrc: '/img/Ruki/Attack1.png',   framesMax: 4 },
-    takeHit: { imageSrc: '/img/Ruki/Take hit.png',  framesMax: 3 },
-    death:   { imageSrc: '/img/Ruki/Death.png',     framesMax: 7, offsetY: 90 }
+    idle:    { imageSrc: `${BASE}img/Ruki/Idle.png`,      framesMax: 4 },
+    run:     { imageSrc: `${BASE}img/Ruki/Run.png`,       framesMax: 8 },
+    jump:    { imageSrc: `${BASE}img/Ruki/Jump.png`,      framesMax: 2 },
+    fall:    { imageSrc: `${BASE}img/Ruki/Fall.png`,      framesMax: 2 },
+    attack1: { imageSrc: `${BASE}img/Ruki/Attack1.png`,   framesMax: 4 },
+    takeHit: { imageSrc: `${BASE}img/Ruki/Take hit.png`,  framesMax: 3 },
+    death:   { imageSrc: `${BASE}img/Ruki/Death.png`,     framesMax: 7, offsetY: 90 }
   },
   attackBox: { offset: { x: 60, y: 50 }, width: 140, height: 60 }
 }
 
 const CHUN_CFG = {
-  imageSrc:     '/img/Chun/Idle.png',
+  imageSrc:     `${BASE}img/Chun/Idle.png`,
   framesMax:    4,
   scale:        2.0,
   offset:       { x: 160, y: 145 },
   frameDuration: 115,
   facingRight:  true,
   sprites: {
-    idle:    { imageSrc: '/img/Chun/Idle.png',      framesMax: 4 },
-    run:     { imageSrc: '/img/Chun/Run.png',       framesMax: 8 },
-    jump:    { imageSrc: '/img/Chun/Jump.png',      framesMax: 2 },
-    fall:    { imageSrc: '/img/Chun/Fall.png',      framesMax: 2 },
-    attack1: { imageSrc: '/img/Chun/Attack1.png',   framesMax: 4 },
-    takeHit: { imageSrc: '/img/Chun/Take hit.png',  framesMax: 3 },
-    death:   { imageSrc: '/img/Chun/Death.png',     framesMax: 7, offsetY: 90 }
+    idle:    { imageSrc: `${BASE}img/Chun/Idle.png`,      framesMax: 4 },
+    run:     { imageSrc: `${BASE}img/Chun/Run.png`,       framesMax: 8 },
+    jump:    { imageSrc: `${BASE}img/Chun/Jump.png`,      framesMax: 2 },
+    fall:    { imageSrc: `${BASE}img/Chun/Fall.png`,      framesMax: 2 },
+    attack1: { imageSrc: `${BASE}img/Chun/Attack1.png`,   framesMax: 4 },
+    takeHit: { imageSrc: `${BASE}img/Chun/Take hit.png`,  framesMax: 3 },
+    death:   { imageSrc: `${BASE}img/Chun/Death.png`,     framesMax: 7, offsetY: 90 }
   },
   attackBox: { offset: { x: 60, y: 50 }, width: 140, height: 60 }
 }
@@ -201,7 +202,7 @@ function showWinGif(winnerId) {
   const gifEl  = document.querySelector(winnerId === 'player' ? '#winGifPlayer' : '#winGifEnemy')
   const isRuki = (winnerId === 'player' && playerCharacter === 'ruki') ||
                  (winnerId === 'enemy'  && playerCharacter !== 'ruki')
-  const src = isRuki ? '/img/Ruki/Win.gif' : '/img/Chun/win.gif'
+  const src = isRuki ? `${BASE}img/Ruki/Win.gif` : `${BASE}img/Chun/win.gif`
 
   gifEl.src = ''
   gifEl.src = src
@@ -371,7 +372,7 @@ function triggerUltimate(attackerId) {
   const defender = attackerId === 'player' ? enemy : player
   const isRukiAttacker = (attackerId === 'player' && playerCharacter === 'ruki') ||
                          (attackerId === 'enemy'  && playerCharacter !== 'ruki')
-  const gifSrc = isRukiAttacker ? '/img/Ruki/cum.gif' : '/img/Chun/cum.gif'
+  const gifSrc = isRukiAttacker ? `${BASE}img/Ruki/cum.gif` : `${BASE}img/Chun/cum.gif`
 
   const savedPlayerPos = { x: player.position.x, y: player.position.y }
   const savedEnemyPos  = { x: enemy.position.x,  y: enemy.position.y  }
@@ -616,5 +617,7 @@ function resizeGame() {
 
 window.addEventListener('resize', resizeGame)
 resizeGame()
+
+document.querySelector('.game-wrapper').style.backgroundImage = `url(${BASE}img/background2.png)`
 
 animate()
