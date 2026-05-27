@@ -2,7 +2,6 @@ import gsap from 'gsap'
 import { Sprite, Fighter } from './classes.js'
 import { 
   rectangularCollision, 
-  determineWinner, 
   screenShake, 
   showUltimateOverlay,
   updateUltimateMeter,
@@ -11,13 +10,11 @@ import {
   updateParticles
 } from './utils.js'
 
-// DOM Elements
 const startScreen = document.querySelector('#startScreen')
 const gameContainer = document.querySelector('#gameContainer')
 const startBtn = document.querySelector('#startBtn')
 const restartBtn = document.querySelector('#restartBtn')
 
-// Canvas setup
 const canvas = document.querySelector('#gameCanvas')
 const c = canvas.getContext('2d')
 
@@ -26,50 +23,47 @@ canvas.height = 576
 
 const gravity = 0.7
 
-// Game state
-let player, enemy, background, shop
+let player, enemy
 let timer = 60
 let timerId
 let gameStarted = false
 let particles = []
+let lastTimestamp = 0
 
-// Initialize game objects
-function initGame() {
+let playerWins = 0
+let enemyWins = 0
+let roundNumber = 1
+let roundEnded = false
+
+function initGame(preserveUltimate = false) {
+  const savedPlayerUlt = preserveUltimate && player ? player.ultimateMeter : 0
+  const savedEnemyUlt = preserveUltimate && enemy ? enemy.ultimateMeter : 0
+
   particles = []
   timer = 60
+  roundEnded = false
   document.querySelector('#timer').innerHTML = timer
-  document.querySelector('#displayText').classList.remove('active')
-  
-  background = new Sprite({
-    position: { x: 0, y: 0 },
-    imageSrc: '/img/background.png'
-  })
-
-  shop = new Sprite({
-    position: { x: 600, y: 128 },
-    imageSrc: '/img/shop.png',
-    scale: 2.75,
-    framesMax: 6
-  })
+  document.querySelector('#displayText').classList.remove('active', 'match-over')
+  hideWinGifs()
 
   player = new Fighter({
     position: { x: 100, y: 0 },
     velocity: { x: 0, y: 0 },
-    offset: { x: 0, y: 0 },
-    imageSrc: '/img/samuraiMack/Idle.png',
-    framesMax: 8,
-    scale: 2.5,
-    offset: { x: 215, y: 157 },
+    imageSrc: '/img/Ruki/Idle.png',
+    framesMax: 4,
+    scale: 2.0,
+    offset: { x: 160, y: 145 },
+    frameDuration: 115,
     sprites: {
-      idle: { imageSrc: '/img/samuraiMack/Idle.png', framesMax: 8 },
-      run: { imageSrc: '/img/samuraiMack/Run.png', framesMax: 8 },
-      jump: { imageSrc: '/img/samuraiMack/Jump.png', framesMax: 2 },
-      fall: { imageSrc: '/img/samuraiMack/Fall.png', framesMax: 2 },
-      attack1: { imageSrc: '/img/samuraiMack/Attack1.png', framesMax: 6 },
-      takeHit: { imageSrc: '/img/samuraiMack/Take Hit - white silhouette.png', framesMax: 4 },
-      death: { imageSrc: '/img/samuraiMack/Death.png', framesMax: 6 }
+      idle: { imageSrc: '/img/Ruki/Idle.png', framesMax: 4 },
+      run: { imageSrc: '/img/Ruki/Run.png', framesMax: 8 },
+      jump: { imageSrc: '/img/Ruki/Jump.png', framesMax: 2 },
+      fall: { imageSrc: '/img/Ruki/Fall.png', framesMax: 2 },
+      attack1: { imageSrc: '/img/Ruki/Attack1.png', framesMax: 4 },
+      takeHit: { imageSrc: '/img/Ruki/Take hit.png', framesMax: 3 },
+      death: { imageSrc: '/img/Ruki/Death.png', framesMax: 7, offsetY: 90 }
     },
-    attackBox: { offset: { x: 100, y: 50 }, width: 160, height: 50 },
+    attackBox: { offset: { x: 60, y: 50 }, width: 140, height: 60 },
     canvas,
     gravity
   })
@@ -78,34 +72,130 @@ function initGame() {
     position: { x: 800, y: 100 },
     velocity: { x: 0, y: 0 },
     color: 'blue',
-    offset: { x: -50, y: 0 },
-    imageSrc: '/img/kenji/Idle.png',
+    imageSrc: '/img/Chun/Idle.png',
     framesMax: 4,
-    scale: 2.5,
-    offset: { x: 215, y: 167 },
+    scale: 2.0,
+    offset: { x: 160, y: 145 },
+    frameDuration: 115,
+    facingRight: true,
     sprites: {
-      idle: { imageSrc: '/img/kenji/Idle.png', framesMax: 4 },
-      run: { imageSrc: '/img/kenji/Run.png', framesMax: 8 },
-      jump: { imageSrc: '/img/kenji/Jump.png', framesMax: 2 },
-      fall: { imageSrc: '/img/kenji/Fall.png', framesMax: 2 },
-      attack1: { imageSrc: '/img/kenji/Attack1.png', framesMax: 4 },
-      takeHit: { imageSrc: '/img/kenji/Take hit.png', framesMax: 3 },
-      death: { imageSrc: '/img/kenji/Death.png', framesMax: 7 }
+      idle: { imageSrc: '/img/Chun/Idle.png', framesMax: 4 },
+      run: { imageSrc: '/img/Chun/Run.png', framesMax: 8 },
+      jump: { imageSrc: '/img/Chun/Jump.png', framesMax: 2 },
+      fall: { imageSrc: '/img/Chun/Fall.png', framesMax: 2 },
+      attack1: { imageSrc: '/img/Chun/Attack1.png', framesMax: 4 },
+      takeHit: { imageSrc: '/img/Chun/Take hit.png', framesMax: 3 },
+      death: { imageSrc: '/img/Chun/Death.png', framesMax: 7, offsetY: 90 }
     },
-    attackBox: { offset: { x: -170, y: 50 }, width: 170, height: 50 },
+    attackBox: { offset: { x: 60, y: 50 }, width: 140, height: 60 },
     canvas,
     gravity
   })
 
-  // Reset health bars
+  player.ultimateMeter = savedPlayerUlt
+  enemy.ultimateMeter = savedEnemyUlt
+
   gsap.to('#playerHealth', { width: '100%', duration: 0.3 })
   gsap.to('#enemyHealth', { width: '100%', duration: 0.3 })
-  
-  // Reset ultimate bars
-  document.querySelector('#playerUltimate').style.width = '0%'
-  document.querySelector('#enemyUltimate').style.width = '0%'
-  document.querySelector('#playerUltReady').classList.remove('active')
-  document.querySelector('#enemyUltReady').classList.remove('active')
+
+  if (!preserveUltimate) {
+    document.querySelector('#playerUltimate').style.width = '0%'
+    document.querySelector('#enemyUltimate').style.width = '0%'
+    document.querySelector('#playerUltReady').classList.remove('active')
+    document.querySelector('#enemyUltReady').classList.remove('active')
+  }
+
+  updateRoundLabel()
+}
+
+function updateRoundLabel() {
+  const label = document.querySelector('#roundLabel')
+  if (label) label.textContent = `ROUND ${roundNumber}`
+}
+
+function updateWinDots() {
+  document.querySelectorAll('#playerWinDots .win-dot').forEach((dot, i) => {
+    dot.classList.toggle('filled', i < playerWins)
+  })
+  document.querySelectorAll('#enemyWinDots .win-dot').forEach((dot, i) => {
+    dot.classList.toggle('filled', i < enemyWins)
+  })
+}
+
+function showWinGif(winnerId) {
+  const winner = winnerId === 'player' ? player : enemy
+  const gifEl = document.querySelector(winnerId === 'player' ? '#winGifPlayer' : '#winGifEnemy')
+  const src = winnerId === 'player' ? '/img/Ruki/Win.gif' : '/img/Chun/win.gif'
+
+  gifEl.src = ''
+  gifEl.src = src
+
+  const isFacingLeft = winner.facingRight ? winner.flipped : !winner.flipped
+  gifEl.style.transform = isFacingLeft
+    ? 'translateX(-50%) scaleX(-1)'
+    : 'translateX(-50%)'
+  gifEl.style.display = 'block'
+}
+
+function hideWinGifs() {
+  const p = document.querySelector('#winGifPlayer')
+  const e = document.querySelector('#winGifEnemy')
+  if (p) { p.style.display = 'none'; p.src = '' }
+  if (e) { e.style.display = 'none'; e.src = '' }
+}
+
+function endRound(winnerId) {
+  if (roundEnded) return
+  roundEnded = true
+  clearTimeout(timerId)
+
+  const displayText = document.querySelector('#displayText')
+  const winnerText = displayText.querySelector('.winner-text')
+
+  if (winnerId === 'player') {
+    playerWins++
+    winnerText.textContent = 'PLAYER 1 WINS!'
+    winnerText.style.color = '#ff0080'
+    player.visible = false
+    showWinGif('player')
+  } else if (winnerId === 'enemy') {
+    enemyWins++
+    winnerText.textContent = 'PLAYER 2 WINS!'
+    winnerText.style.color = '#00ffff'
+    enemy.visible = false
+    showWinGif('enemy')
+  } else {
+    winnerText.textContent = 'DRAW!'
+    winnerText.style.color = '#fff'
+  }
+
+  updateWinDots()
+  displayText.classList.add('active')
+
+  setTimeout(() => {
+    if (playerWins >= 2 || enemyWins >= 2) {
+      const matchWinner = playerWins >= 2 ? 'PLAYER 1' : 'PLAYER 2'
+      winnerText.textContent = `${matchWinner} WINS THE MATCH!`
+      displayText.classList.add('match-over')
+    } else {
+      roundNumber++
+      displayText.classList.remove('active')
+      showRoundBanner(() => {
+        initGame(true)
+        decreaseTimer()
+      })
+    }
+  }, 3000)
+}
+
+function showRoundBanner(callback) {
+  const banner = document.querySelector('#roundBanner')
+  banner.textContent = `ROUND ${roundNumber}`
+  banner.classList.add('active')
+  setTimeout(() => {
+    banner.classList.remove('active')
+    callback()
+  }, 1500)
 }
 
 const keys = {
@@ -123,11 +213,13 @@ function decreaseTimer() {
   }
 
   if (timer === 0) {
-    determineWinner({ player, enemy, timerId })
+    const winnerId = player.health > enemy.health ? 'player'
+      : enemy.health > player.health ? 'enemy'
+      : 'tie'
+    endRound(winnerId)
   }
 }
 
-// Combo tracking
 let playerCombo = 0
 let enemyCombo = 0
 let playerComboTimer = null
@@ -136,47 +228,44 @@ let enemyComboTimer = null
 function handlePlayerHit() {
   playerCombo++
   showCombo(playerCombo, true)
-  
   clearTimeout(playerComboTimer)
-  playerComboTimer = setTimeout(() => {
-    playerCombo = 0
-  }, 1000)
+  playerComboTimer = setTimeout(() => { playerCombo = 0 }, 1000)
 }
 
 function handleEnemyHit() {
   enemyCombo++
   showCombo(enemyCombo, false)
-  
   clearTimeout(enemyComboTimer)
-  enemyComboTimer = setTimeout(() => {
-    enemyCombo = 0
-  }, 1000)
+  enemyComboTimer = setTimeout(() => { enemyCombo = 0 }, 1000)
 }
 
-function animate() {
+function animate(timestamp) {
   window.requestAnimationFrame(animate)
-  
+
+  const deltaTime = lastTimestamp ? Math.min(timestamp - lastTimestamp, 50) : 16
+  lastTimestamp = timestamp
+
   if (!gameStarted) return
-  
-  c.fillStyle = 'black'
-  c.fillRect(0, 0, canvas.width, canvas.height)
-  
-  background.update(c)
-  shop.update(c)
-  
-  c.fillStyle = 'rgba(255, 255, 255, 0.15)'
-  c.fillRect(0, 0, canvas.width, canvas.height)
-  
-  player.update(c)
-  enemy.update(c)
-  
-  // Update particles
+
+  c.clearRect(0, 0, canvas.width, canvas.height)
+
+  player.flipped = player.facingRight
+    ? player.position.x > enemy.position.x
+    : player.position.x < enemy.position.x
+  enemy.flipped = enemy.facingRight
+    ? enemy.position.x > player.position.x
+    : enemy.position.x < player.position.x
+
+  player.update(c, deltaTime)
+  enemy.update(c, deltaTime)
+
   updateParticles(c, particles)
+
+  if (roundEnded) return
 
   player.velocity.x = 0
   enemy.velocity.x = 0
 
-  // Player movement
   if (keys.a.pressed && player.lastKey === 'a') {
     player.velocity.x = -5
     player.switchSprite('run')
@@ -187,14 +276,12 @@ function animate() {
     player.switchSprite('idle')
   }
 
-  // Player jumping
   if (player.velocity.y < 0) {
     player.switchSprite('jump')
   } else if (player.velocity.y > 0) {
     player.switchSprite('fall')
   }
 
-  // Enemy movement
   if (keys.ArrowLeft.pressed && enemy.lastKey === 'ArrowLeft') {
     enemy.velocity.x = -5
     enemy.switchSprite('run')
@@ -205,54 +292,46 @@ function animate() {
     enemy.switchSprite('idle')
   }
 
-  // Enemy jumping
   if (enemy.velocity.y < 0) {
     enemy.switchSprite('jump')
   } else if (enemy.velocity.y > 0) {
     enemy.switchSprite('fall')
   }
 
-  // Player hits enemy
   if (
     rectangularCollision({ rectangle1: player, rectangle2: enemy }) &&
     player.isAttacking &&
-    player.framesCurrent === 4
+    player.framesCurrent === 1
   ) {
     enemy.takeHit()
     player.isAttacking = false
     player.gainUltimate(15)
     handlePlayerHit()
     screenShake()
-
     gsap.to('#enemyHealth', { width: enemy.health + '%' })
   }
 
-  // Player misses
-  if (player.isAttacking && player.framesCurrent === 4) {
+  if (player.isAttacking && player.framesCurrent === player.sprites.attack1.framesMax - 1) {
     player.isAttacking = false
   }
 
-  // Enemy hits player
   if (
     rectangularCollision({ rectangle1: enemy, rectangle2: player }) &&
     enemy.isAttacking &&
-    enemy.framesCurrent === 2
+    enemy.framesCurrent === 1
   ) {
     player.takeHit()
     enemy.isAttacking = false
     enemy.gainUltimate(15)
     handleEnemyHit()
     screenShake()
-
     gsap.to('#playerHealth', { width: player.health + '%' })
   }
 
-  // Enemy misses
-  if (enemy.isAttacking && enemy.framesCurrent === 2) {
+  if (enemy.isAttacking && enemy.framesCurrent === enemy.sprites.attack1.framesMax - 1) {
     enemy.isAttacking = false
   }
 
-  // Ultimate collision detection
   if (player.isUltimating) {
     const ultHitbox = {
       attackBox: {
@@ -261,7 +340,6 @@ function animate() {
         height: 150
       }
     }
-    
     if (
       ultHitbox.attackBox.position.x + ultHitbox.attackBox.width >= enemy.position.x &&
       ultHitbox.attackBox.position.x <= enemy.position.x + enemy.width &&
@@ -270,11 +348,7 @@ function animate() {
       enemy.takeHit(player.ultimateDamage)
       player.isUltimating = false
       screenShake()
-      
-      // Add particles
-      const newParticles = createUltimateParticles(c, enemy.position.x, enemy.position.y, '255, 0, 128')
-      particles.push(...newParticles)
-      
+      particles.push(...createUltimateParticles(c, enemy.position.x, enemy.position.y, '255, 0, 128'))
       gsap.to('#enemyHealth', { width: enemy.health + '%' })
     }
   }
@@ -287,7 +361,6 @@ function animate() {
         height: 150
       }
     }
-    
     if (
       ultHitbox.attackBox.position.x + ultHitbox.attackBox.width >= player.position.x &&
       ultHitbox.attackBox.position.x <= player.position.x + player.width &&
@@ -296,99 +369,72 @@ function animate() {
       player.takeHit(enemy.ultimateDamage)
       enemy.isUltimating = false
       screenShake()
-      
-      // Add particles
-      const newParticles = createUltimateParticles(c, player.position.x, player.position.y, '0, 255, 255')
-      particles.push(...newParticles)
-      
+      particles.push(...createUltimateParticles(c, player.position.x, player.position.y, '0, 255, 255'))
       gsap.to('#playerHealth', { width: player.health + '%' })
     }
   }
 
-  // Update ultimate meters
   updateUltimateMeter(player, enemy)
 
-  // End game based on health
   if (enemy.health <= 0 || player.health <= 0) {
-    determineWinner({ player, enemy, timerId })
+    const winnerId = player.health <= 0 ? 'enemy' : 'player'
+    endRound(winnerId)
   }
 }
 
-// Start game
 function startGame() {
   startScreen.style.display = 'none'
-  gameContainer.style.display = 'block'
+  gameContainer.style.display = 'flex'
   gameStarted = true
+  playerWins = 0
+  enemyWins = 0
+  roundNumber = 1
+  updateWinDots()
   initGame()
-  decreaseTimer()
+  showRoundBanner(() => decreaseTimer())
 }
 
-// Restart game
 function restartGame() {
   clearTimeout(timerId)
+  playerWins = 0
+  enemyWins = 0
+  roundNumber = 1
+  updateWinDots()
   initGame()
-  gameStarted = true
-  decreaseTimer()
+  showRoundBanner(() => decreaseTimer())
 }
 
-// Event listeners
 startBtn.addEventListener('click', startGame)
 restartBtn.addEventListener('click', restartGame)
 
 window.addEventListener('keydown', (event) => {
-  if (!gameStarted) return
-  
+  if (!gameStarted || roundEnded) return
+
   if (!player.dead) {
     switch (event.key) {
-      case 'd':
-        keys.d.pressed = true
-        player.lastKey = 'd'
-        break
-      case 'a':
-        keys.a.pressed = true
-        player.lastKey = 'a'
-        break
+      case 'd': keys.d.pressed = true; player.lastKey = 'd'; break
+      case 'a': keys.a.pressed = true; player.lastKey = 'a'; break
       case 'w':
-        if (player.velocity.y === 0) {
-          player.velocity.y = -20
-        }
+        if (player.velocity.y === 0) player.velocity.y = -20
         break
-      case ' ':
-        player.attack()
-        break
+      case ' ': player.attack(); break
       case 'q':
       case 'Q':
-        if (player.useUltimate()) {
-          showUltimateOverlay()
-          screenShake()
-        }
+        if (player.useUltimate()) { showUltimateOverlay(); screenShake() }
         break
     }
   }
 
   if (!enemy.dead) {
     switch (event.key) {
-      case 'ArrowRight':
-        keys.ArrowRight.pressed = true
-        enemy.lastKey = 'ArrowRight'
-        break
-      case 'ArrowLeft':
-        keys.ArrowLeft.pressed = true
-        enemy.lastKey = 'ArrowLeft'
-        break
+      case 'ArrowRight': keys.ArrowRight.pressed = true; enemy.lastKey = 'ArrowRight'; break
+      case 'ArrowLeft': keys.ArrowLeft.pressed = true; enemy.lastKey = 'ArrowLeft'; break
       case 'ArrowUp':
-        if (enemy.velocity.y === 0) {
-          enemy.velocity.y = -20
-        }
+        if (enemy.velocity.y === 0) enemy.velocity.y = -20
         break
-      case 'ArrowDown':
-        enemy.attack()
-        break
+      case 'ArrowDown': enemy.attack(); break
       case '/':
-        if (enemy.useUltimate()) {
-          showUltimateOverlay()
-          screenShake()
-        }
+        if (enemy.useUltimate()) { showUltimateOverlay(); screenShake() }
         break
     }
   }
@@ -396,20 +442,21 @@ window.addEventListener('keydown', (event) => {
 
 window.addEventListener('keyup', (event) => {
   switch (event.key) {
-    case 'd':
-      keys.d.pressed = false
-      break
-    case 'a':
-      keys.a.pressed = false
-      break
-    case 'ArrowRight':
-      keys.ArrowRight.pressed = false
-      break
-    case 'ArrowLeft':
-      keys.ArrowLeft.pressed = false
-      break
+    case 'd': keys.d.pressed = false; break
+    case 'a': keys.a.pressed = false; break
+    case 'ArrowRight': keys.ArrowRight.pressed = false; break
+    case 'ArrowLeft': keys.ArrowLeft.pressed = false; break
   }
 })
 
-// Initialize animation loop
+function resizeGame() {
+  const wrapper = document.querySelector('.game-wrapper')
+  const scaleX = window.innerWidth / 1024
+  const scaleY = window.innerHeight / 576
+  wrapper.style.transform = `scale(${Math.min(scaleX, scaleY)})`
+}
+
+window.addEventListener('resize', resizeGame)
+resizeGame()
+
 animate()

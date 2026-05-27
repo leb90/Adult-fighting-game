@@ -58,11 +58,16 @@
             </div>
             <div id="playerUltReady" class="ult-ready">READY!</div>
           </div>
+          <div class="win-dots" id="playerWinDots">
+            <span class="win-dot"></span>
+            <span class="win-dot"></span>
+          </div>
         </div>
 
         <!-- Timer -->
         <div class="timer-section">
           <div id="timer" class="timer">60</div>
+          <div id="roundLabel" class="round-label">ROUND 1</div>
           <div class="brand-badge">FYTEFANS</div>
         </div>
 
@@ -80,6 +85,10 @@
             </div>
             <div id="enemyUltReady" class="ult-ready">READY!</div>
           </div>
+          <div class="win-dots" id="enemyWinDots">
+            <span class="win-dot"></span>
+            <span class="win-dot"></span>
+          </div>
         </div>
       </div>
 
@@ -94,8 +103,18 @@
         <div class="ultimate-text">ULTIMATE!</div>
       </div>
 
+      <!-- Shop GIF (rendered as HTML so the browser anima it natively) -->
+      <img id="shopGif" src="/img/shop2.gif" alt="" class="shop-gif" />
+
       <!-- Canvas -->
       <canvas id="gameCanvas"></canvas>
+
+      <!-- Win GIFs (shown when a round ends) -->
+      <img id="winGifPlayer" class="win-gif" src="" alt="" />
+      <img id="winGifEnemy" class="win-gif" src="" alt="" />
+
+      <!-- Round banner (shown between rounds) -->
+      <div id="roundBanner" class="round-banner"></div>
 
       <!-- Combo Display -->
       <div id="comboP1" class="combo-display left"></div>

@@ -190,17 +190,26 @@ body {
 
 /* Game Container */
 #gameContainer {
-  position: relative;
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .game-wrapper {
   position: relative;
-  display: inline-block;
+  width: 1024px;
+  height: 576px;
+  flex-shrink: 0;
+  transform-origin: center center;
   border-radius: 10px;
   overflow: hidden;
   box-shadow: 
     0 0 50px rgba(255, 0, 128, 0.3),
     0 0 100px rgba(0, 255, 255, 0.2);
+  background-image: url('/img/background2.png');
+  background-size: 100% 100%;
 }
 
 /* HUD */
@@ -369,17 +378,23 @@ body {
 /* Display Text */
 .display-text {
   position: absolute;
-  inset: 0;
+  top: 22%;
+  left: 0;
+  right: 0;
   display: none;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
-  background: rgba(0, 0, 0, 0.85);
+  background: transparent;
   z-index: 20;
+  pointer-events: none;
 }
 
 .display-text.active {
   display: flex;
+}
+
+.display-text.match-over {
+  pointer-events: auto;
 }
 
 .winner-text {
@@ -388,9 +403,15 @@ body {
   font-weight: 900;
   color: #ffd700;
   text-shadow: 
-    0 0 20px rgba(255, 215, 0, 0.8),
-    0 0 40px rgba(255, 215, 0, 0.6);
+    0 0 10px rgba(0,0,0,0.9),
+    2px 2px 0 #000,
+    -2px -2px 0 #000,
+    2px -2px 0 #000,
+    -2px 2px 0 #000,
+    0 0 30px rgba(255, 215, 0, 0.9),
+    0 0 60px rgba(255, 215, 0, 0.5);
   animation: winPulse 1s ease infinite;
+  letter-spacing: 3px;
 }
 
 @keyframes winPulse {
@@ -474,20 +495,126 @@ body {
   100% { transform: scale(1); }
 }
 
-/* Canvas */
-#gameCanvas {
+/* Win dots */
+.win-dots {
+  display: flex;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.p2 .win-dots {
+  justify-content: flex-end;
+}
+
+.win-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  background: transparent;
+  transition: all 0.3s ease;
+}
+
+.win-dot.filled {
+  background: #ffd700;
+  border-color: #ffd700;
+  box-shadow: 0 0 8px rgba(255, 215, 0, 0.9);
+}
+
+/* Round label */
+.round-label {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 9px;
+  color: rgba(255, 255, 255, 0.6);
+  letter-spacing: 2px;
+  margin-top: 4px;
+  text-align: center;
+}
+
+/* Win GIF elements */
+.win-gif {
+  position: absolute;
+  height: 210px;
+  width: auto;
+  bottom: 96px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3;
+  display: none;
+  image-rendering: pixelated;
+}
+
+/* Round banner */
+.round-banner {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 56px;
+  font-weight: 900;
+  color: #fff;
+  text-shadow:
+    0 0 20px rgba(255, 0, 128, 0.9),
+    0 0 40px rgba(255, 0, 128, 0.6);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 25;
+  letter-spacing: 6px;
+  transition: opacity 0.3s ease;
+}
+
+.round-banner.active {
+  opacity: 1;
+  animation: bannerPop 1.5s ease forwards;
+}
+
+@keyframes bannerPop {
+  0% { transform: scale(0.6); opacity: 0; }
+  30% { transform: scale(1.1); opacity: 1; }
+  70% { transform: scale(1); opacity: 1; }
+  100% { transform: scale(1); opacity: 0; }
+}
+
+/* Display text — restart button only shows on match over */
+.display-text .neon-btn {
+  display: none;
+}
+
+.display-text.match-over .neon-btn {
   display: block;
 }
 
-/* Screen shake effect */
+/* Canvas */
+#gameCanvas {
+  display: block;
+  position: relative;
+  z-index: 2;
+  background: transparent;
+}
+
+.shop-gif {
+  position: absolute;
+  left: 620px;
+  top: 264px;
+  width: 242px;
+  z-index: 1;
+  pointer-events: none;
+  image-rendering: pixelated;
+  filter: blur(1.5px) brightness(0.85);
+  opacity: 0.85;
+}
+
+/* Screen shake effect — usa translate individual para no pisar transform: scale() */
 .shake {
   animation: shake 0.3s ease;
 }
 
 @keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  20% { transform: translateX(-10px); }
-  40% { transform: translateX(10px); }
-  60% { transform: translateX(-5px); }
-  80% { transform: translateX(5px); }
+  0%, 100% { translate: 0px 0px; }
+  20% { translate: -10px 0px; }
+  40% { translate: 10px 0px; }
+  60% { translate: -5px 0px; }
+  80% { translate: 5px 0px; }
 }

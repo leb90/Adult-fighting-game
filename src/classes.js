@@ -4,7 +4,8 @@ export class Sprite {
     imageSrc,
     scale = 1,
     framesMax = 1,
-    offset = { x: 0, y: 0 }
+    offset = { x: 0, y: 0 },
+    frameDuration = 95
   }) {
     this.position = position
     this.width = 50
@@ -14,29 +15,47 @@ export class Sprite {
     this.scale = scale
     this.framesMax = framesMax
     this.framesCurrent = 0
-    this.framesElapsed = 0
-    this.framesHold = 5
+    this.frameTime = 0
+    this.frameDuration = frameDuration
     this.offset = offset
+    this.visible = true
   }
 
   draw(c) {
-    c.drawImage(
-      this.image,
-      this.framesCurrent * (this.image.width / this.framesMax),
-      0,
-      this.image.width / this.framesMax,
-      this.image.height,
-      this.position.x - this.offset.x,
-      this.position.y - this.offset.y,
-      (this.image.width / this.framesMax) * this.scale,
-      this.image.height * this.scale
-    )
+    if (!this.visible) return
+    const frameWidth = this.image.width / this.framesMax
+    const drawX = this.position.x - this.offset.x
+    const drawY = this.position.y - this.offset.y
+    const drawW = frameWidth * this.scale
+    const drawH = this.image.height * this.scale
+
+    if (this.flipped) {
+      c.save()
+      c.scale(-1, 1)
+      c.drawImage(
+        this.image,
+        this.framesCurrent * frameWidth, 0,
+        frameWidth, this.image.height,
+        -(drawX + drawW), drawY,
+        drawW, drawH
+      )
+      c.restore()
+    } else {
+      c.drawImage(
+        this.image,
+        this.framesCurrent * frameWidth, 0,
+        frameWidth, this.image.height,
+        drawX, drawY,
+        drawW, drawH
+      )
+    }
   }
 
-  animateFrames() {
-    this.framesElapsed++
+  animateFrames(deltaTime) {
+    this.frameTime += deltaTime
 
-    if (this.framesElapsed % this.framesHold === 0) {
+    if (this.frameTime >= this.frameDuration) {
+      this.frameTime = 0
       if (this.framesCurrent < this.framesMax - 1) {
         this.framesCurrent++
       } else {
@@ -45,9 +64,9 @@ export class Sprite {
     }
   }
 
-  update(c) {
+  update(c, deltaTime) {
     this.draw(c)
-    this.animateFrames()
+    this.animateFrames(deltaTime)
   }
 }
 
@@ -60,6 +79,8 @@ export class Fighter extends Sprite {
     scale = 1,
     framesMax = 1,
     offset = { x: 0, y: 0 },
+    frameDuration = 100,
+    facingRight = false,
     sprites,
     attackBox = { offset: {}, width: undefined, height: undefined },
     canvas,
@@ -70,7 +91,8 @@ export class Fighter extends Sprite {
       imageSrc,
       scale,
       framesMax,
-      offset
+      offset,
+      frameDuration
     })
 
     this.velocity = velocity
@@ -87,24 +109,23 @@ export class Fighter extends Sprite {
       height: attackBox.height
     }
     this.color = color
+    this.facingRight = facingRight
+    this.flipped = false
     this.isAttacking = false
     this.health = 100
     this.framesCurrent = 0
-    this.framesElapsed = 0
-    this.framesHold = 5
+    this.frameTime = 0
     this.sprites = sprites
     this.dead = false
     this.canvas = canvas
     this.gravity = gravity
-    
-    // Ultimate system
+
     this.ultimateMeter = 0
     this.maxUltimate = 100
     this.isUltimating = false
     this.ultimateDamage = 40
     this.ultimateCooldown = false
-    
-    // Combo system
+
     this.comboCount = 0
     this.comboTimer = null
     this.lastHitTime = 0
@@ -115,18 +136,28 @@ export class Fighter extends Sprite {
     }
   }
 
-  update(c) {
+  update(c, deltaTime) {
     this.draw(c)
-    if (!this.dead) this.animateFrames()
+    if (!this.dead) {
+      if (
+        this.image === this.sprites.death.image &&
+        this.framesCurrent === this.sprites.death.framesMax - 1
+      ) {
+        this.dead = true
+      } else {
+        this.animateFrames(deltaTime)
+      }
+    }
 
-    // Attack box position
-    this.attackBox.position.x = this.position.x + this.attackBox.offset.x
+    const isFacingLeft = this.facingRight ? this.flipped : !this.flipped
+    this.attackBox.position.x = isFacingLeft
+      ? this.position.x - this.attackBox.offset.x - this.attackBox.width
+      : this.position.x + this.attackBox.offset.x
     this.attackBox.position.y = this.position.y + this.attackBox.offset.y
 
     this.position.x += this.velocity.x
     this.position.y += this.velocity.y
 
-    // Gravity
     if (this.position.y + this.height + this.velocity.y >= this.canvas.height - 96) {
       this.velocity.y = 0
       this.position.y = 330
@@ -140,19 +171,17 @@ export class Fighter extends Sprite {
     this.isAttacking = true
   }
 
-  // Ultimate attack!
   useUltimate() {
     if (this.ultimateMeter >= this.maxUltimate && !this.ultimateCooldown && !this.dead) {
       this.isUltimating = true
       this.ultimateMeter = 0
       this.ultimateCooldown = true
-      
-      // Reset cooldown after animation
+
       setTimeout(() => {
         this.ultimateCooldown = false
         this.isUltimating = false
       }, 800)
-      
+
       return true
     }
     return false
@@ -177,13 +206,9 @@ export class Fighter extends Sprite {
 
   switchSprite(sprite) {
     if (this.image === this.sprites.death.image) {
-      if (this.framesCurrent === this.sprites.death.framesMax - 1) {
-        this.dead = true
-      }
       return
     }
 
-    // Override with attack animation
     if (
       this.image === this.sprites.attack1.image &&
       this.framesCurrent < this.sprites.attack1.framesMax - 1
@@ -191,7 +216,6 @@ export class Fighter extends Sprite {
       return
     }
 
-    // Override when taking hit
     if (
       this.image === this.sprites.takeHit.image &&
       this.framesCurrent < this.sprites.takeHit.framesMax - 1
@@ -247,6 +271,9 @@ export class Fighter extends Sprite {
           this.image = this.sprites.death.image
           this.framesMax = this.sprites.death.framesMax
           this.framesCurrent = 0
+          if (this.sprites.death.offsetY !== undefined) {
+            this.offset = { x: this.offset.x, y: this.sprites.death.offsetY }
+          }
         }
         break
     }
