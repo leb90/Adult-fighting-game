@@ -158,6 +158,12 @@ export class Fighter extends Sprite {
     this.position.x += this.velocity.x
     this.position.y += this.velocity.y
 
+    const frameDrawWidth = (this.image.width / this.framesMax) * this.scale
+    const minX = this.offset.x
+    const maxX = this.canvas.width - frameDrawWidth + this.offset.x
+    if (this.position.x < minX) this.position.x = minX
+    if (this.position.x > maxX) this.position.x = maxX
+
     if (this.position.y + this.height + this.velocity.y >= this.canvas.height - 96) {
       this.velocity.y = 0
       this.position.y = 330
@@ -180,7 +186,7 @@ export class Fighter extends Sprite {
       setTimeout(() => {
         this.ultimateCooldown = false
         this.isUltimating = false
-      }, 800)
+      }, 5000)
 
       return true
     }

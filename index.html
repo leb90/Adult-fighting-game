@@ -12,31 +12,64 @@
 <body>
   <!-- Start Screen -->
   <div id="startScreen">
-    <div class="logo-container">
-      <h1 class="main-logo">FYTEFANS</h1>
-      <p class="tagline">ULTIMATE FIGHTER</p>
-    </div>
-    <div class="start-content">
-      <button id="startBtn" class="neon-btn">
-        <span>START FIGHT</span>
-      </button>
-      <div class="controls-info">
-        <div class="player-controls">
-          <h3>PLAYER 1</h3>
-          <p>Move: <span class="key">A</span> <span class="key">D</span></p>
-          <p>Jump: <span class="key">W</span></p>
-          <p>Attack: <span class="key">SPACE</span></p>
-          <p>ULTIMATE: <span class="key">Q</span></p>
-        </div>
-        <div class="player-controls">
-          <h3>PLAYER 2</h3>
-          <p>Move: <span class="key">&larr;</span> <span class="key">&rarr;</span></p>
-          <p>Jump: <span class="key">&uarr;</span></p>
-          <p>Attack: <span class="key">&darr;</span></p>
-          <p>ULTIMATE: <span class="key">/</span></p>
+
+    <!-- Pane 1: Title -->
+    <div id="titlePane">
+      <div class="logo-container">
+        <h1 class="main-logo">FYTEFANS</h1>
+        <p class="tagline">ULTIMATE FIGHTER</p>
+      </div>
+      <div class="start-content">
+        <button id="startBtn" class="neon-btn"><span>START FIGHT</span></button>
+        <div class="controls-info">
+          <div class="player-controls">
+            <h3>PLAYER 1</h3>
+            <p>Move: <span class="key">A</span> <span class="key">D</span></p>
+            <p>Jump: <span class="key">W</span></p>
+            <p>Attack: <span class="key">SPACE</span></p>
+            <p>ULTIMATE: <span class="key">Q</span></p>
+          </div>
+          <div class="player-controls">
+            <h3>PLAYER 2</h3>
+            <p>Move: <span class="key">&larr;</span> <span class="key">&rarr;</span></p>
+            <p>Jump: <span class="key">&uarr;</span></p>
+            <p>Attack: <span class="key">&darr;</span></p>
+            <p>ULTIMATE: <span class="key">/</span></p>
+          </div>
         </div>
       </div>
     </div>
+
+    <!-- Pane 2: Mode Select -->
+    <div id="modePane" class="select-pane" style="display:none">
+      <h2 class="select-title">SELECT MODE</h2>
+      <div class="select-buttons">
+        <button id="mode1v1Btn" class="neon-btn select-btn">
+          <span class="select-btn-title">1 VS 1</span>
+          <span class="select-btn-sub">TWO PLAYERS</span>
+        </button>
+        <button id="mode1vpcBtn" class="neon-btn select-btn">
+          <span class="select-btn-title">1 VS PC</span>
+          <span class="select-btn-sub">VS COMPUTER</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Pane 3: Character Select (1vPC only) -->
+    <div id="charPane" class="select-pane" style="display:none">
+      <h2 class="select-title">SELECT YOUR FIGHTER</h2>
+      <div class="select-buttons">
+        <button id="charRukiBtn" class="neon-btn select-btn char-btn" data-char="ruki">
+          <span class="select-btn-title ruki-color">RUKI</span>
+          <span class="select-btn-sub">PLAYER FIGHTER</span>
+        </button>
+        <button id="charChunBtn" class="neon-btn select-btn char-btn" data-char="chun">
+          <span class="select-btn-title chun-color">CHUN</span>
+          <span class="select-btn-sub">PLAYER FIGHTER</span>
+        </button>
+      </div>
+    </div>
+
   </div>
 
   <!-- Game Container -->
@@ -46,7 +79,7 @@
       <div class="hud">
         <!-- Player 1 Section -->
         <div class="player-section p1">
-          <div class="player-name">PLAYER 1</div>
+          <div class="player-name" id="p1Label">PLAYER 1</div>
           <div class="health-container">
             <div class="health-bg"></div>
             <div id="playerHealth" class="health-bar"></div>
@@ -73,7 +106,7 @@
 
         <!-- Player 2 Section -->
         <div class="player-section p2">
-          <div class="player-name">PLAYER 2</div>
+          <div class="player-name" id="p2Label">PLAYER 2</div>
           <div class="health-container">
             <div class="health-bg"></div>
             <div id="enemyHealth" class="health-bar"></div>
@@ -95,7 +128,8 @@
       <!-- Game Display Text -->
       <div id="displayText" class="display-text">
         <span class="winner-text"></span>
-        <button id="restartBtn" class="neon-btn small">FIGHT AGAIN</button>
+        <span class="press-any-key">PRESS ANY KEY TO RETURN TO MENU</span>
+        <button id="restartBtn" class="neon-btn small">BACK TO MENU</button>
       </div>
 
       <!-- Ultimate Animation Overlay -->
@@ -115,6 +149,10 @@
 
       <!-- Round banner (shown between rounds) -->
       <div id="roundBanner" class="round-banner"></div>
+
+      <!-- Ultimate animation -->
+      <div id="ultFlash" class="ult-flash"></div>
+      <img id="cumGif" class="cum-gif" src="" alt="" />
 
       <!-- Combo Display -->
       <div id="comboP1" class="combo-display left"></div>

@@ -419,6 +419,38 @@ body {
   50% { transform: scale(1.05); }
 }
 
+/* Ultimate cum animation */
+.ult-flash {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  display: none;
+  pointer-events: none;
+}
+
+.ult-flash.active {
+  display: block;
+  animation: ultFlashAnim 0.35s ease infinite;
+}
+
+@keyframes ultFlashAnim {
+  0%   { background: rgba(255, 255, 255, 0.85); }
+  50%  { background: rgba(0, 0, 0, 0.75); }
+  100% { background: rgba(255, 255, 255, 0.85); }
+}
+
+.cum-gif {
+  position: absolute;
+  height: 450px;
+  width: auto;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 31;
+  display: none;
+  image-rendering: pixelated;
+}
+
 /* Ultimate Overlay */
 .ultimate-overlay {
   position: absolute;
@@ -577,8 +609,9 @@ body {
   100% { transform: scale(1); opacity: 0; }
 }
 
-/* Display text — restart button only shows on match over */
-.display-text .neon-btn {
+/* Display text — restart / press-any-key only on match over */
+.display-text .neon-btn,
+.display-text .press-any-key {
   display: none;
 }
 
@@ -586,12 +619,84 @@ body {
   display: block;
 }
 
+.display-text.match-over .press-any-key {
+  display: block;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 11px;
+  color: #fff;
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.7);
+  margin-top: 12px;
+  animation: pressKeyBlink 1.1s ease-in-out infinite;
+}
+
+@keyframes pressKeyBlink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.2; }
+}
+
+/* Select panes (mode / character) inside start screen */
+.select-pane {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 40px;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.select-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 28px;
+  font-weight: 900;
+  color: #fff;
+  text-shadow: 0 0 20px rgba(255, 0, 128, 0.8), 0 0 40px rgba(255, 0, 128, 0.4);
+  letter-spacing: 6px;
+  margin: 0;
+}
+
+.select-buttons {
+  display: flex;
+  gap: 40px;
+}
+
+.select-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 30px 50px;
+  min-width: 200px;
+}
+
+.select-btn-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 22px;
+  font-weight: 900;
+  letter-spacing: 3px;
+}
+
+.select-btn-sub {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 9px;
+  color: rgba(255, 255, 255, 0.6);
+  letter-spacing: 1px;
+}
+
+.ruki-color { color: #ff0080; text-shadow: 0 0 10px rgba(255, 0, 128, 0.8); }
+.chun-color { color: #00ffff; text-shadow: 0 0 10px rgba(0, 255, 255, 0.8); }
+
 /* Canvas */
 #gameCanvas {
   display: block;
   position: relative;
   z-index: 2;
   background: transparent;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
 }
 
 .shop-gif {

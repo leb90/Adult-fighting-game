@@ -1,33 +1,50 @@
-# Adult-fighting-game
+# FYTEFANS — Ultimate Fighter
 
-This is a [Next.js](https://nextjs.org) project bootstrapped with [v0](https://v0.app).
+Juego de peleas 2D para adultos (+18) desarrollado con Vanilla JavaScript y Canvas API, estilo Mortal Kombat.
 
-## Built with v0
+## Personajes
 
-This repository is linked to a [v0](https://v0.app) project. You can continue developing by visiting the link below -- start new chats to make changes, and v0 will push commits directly to this repo. Every merge to `main` will automatically deploy.
+| Personaje | Rol | Controles |
+|-----------|-----|-----------|
+| **Ruki** | Jugador / seleccionable en 1vPC | `A` `D` mover · `W` saltar · `SPACE` atacar · `Q` ultimate |
+| **Chun** | Jugador 2 / CPU seleccionable | `←` `→` mover · `↑` saltar · `↓` atacar · `/` ultimate |
 
-[Continue working on v0 →](https://v0.app/chat/projects/prj_LwdS9VXxoIapWfDeox5YVNAbGwF1)
+## Modos de juego
 
-## Getting Started
+- **1 VS 1** — dos jugadores en el mismo teclado
+- **1 VS PC** — elegís tu personaje (Ruki o Chun) y peleás contra la IA
 
-First, run the development server:
+## Mecánicas
+
+- Sistema de rondas al mejor de 3 (estilo MK)
+- Barra de vida y barra de ultimate por personaje
+- **Ultimate** — al llenar la barra, activá el poder especial: los personajes desaparecen, aparece la animación `cum.gif` con parpadeo blanco/negro y se quita 1/3 de la vida del enemigo
+- Los personajes se chocan físicamente (no se atraviesan) pero se pueden saltar por encima
+- Animaciones de victoria (`win.gif`) al ganar una ronda
+- Música en loop durante la pelea + sonido de golpe en cada impacto
+- IA con comportamiento reactivo: persecución, ataque, retroceso, saltos y uso de ultimate
+
+## Stack técnico
+
+- **Vite** como bundler y servidor de desarrollo
+- **Canvas API** para renderizado de sprites y efectos
+- **HTML `<img>`** para GIFs animados nativos (fondo, victoria, ultimate)
+- **GSAP** para animaciones de barras de vida
+- **CSS `transform: scale()`** para escalar el juego al viewport completo
+
+## Desarrollo local
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Abre [http://localhost:5173](http://localhost:5173) en tu navegador.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Build para producción
 
-## Learn More
+```bash
+npm run build
+```
 
-To learn more, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-- [v0 Documentation](https://v0.app/docs) - learn about v0 and how to use it.
+Los archivos estáticos quedan en la carpeta `dist/`.
