@@ -34,10 +34,12 @@ c.imageSmoothingEnabled = false
 const gravity = 0.7
 const BASE    = import.meta.env.BASE_URL
 
+document.querySelector('#mainLogo').src = `${BASE}img/LOGO FYTE.png`
+
 // ── Audio ─────────────────────────────────────────────────────────────────────
 const fightMusic = new Audio(`${BASE}sound/FightSong.mp3`)
 fightMusic.loop   = true
-fightMusic.volume = 0.5
+fightMusic.volume = 0.4
 
 const punchSfx = new Audio(`${BASE}sound/punch.mp3`)
 punchSfx.volume = 0.7
@@ -45,6 +47,22 @@ punchSfx.volume = 0.7
 function playPunch() {
   punchSfx.currentTime = 0
   punchSfx.play().catch(() => {})
+}
+
+const ultSfx = [
+  new Audio(`${BASE}sound/WhatsApp Ptt 2026-06-19 at 10.43.39.ogg`),
+  new Audio(`${BASE}sound/WhatsApp Ptt 2026-06-19 at 10.43.54.ogg`),
+]
+ultSfx.forEach(a => { a.loop = true; a.volume = 0.9 })
+
+function playUltSfx() {
+  ultSfx.forEach(a => { a.pause(); a.currentTime = 0 })
+  const sfx = ultSfx[Math.floor(Math.random() * ultSfx.length)]
+  sfx.play().catch(() => {})
+}
+
+function stopUltSfx() {
+  ultSfx.forEach(a => { a.pause(); a.currentTime = 0 })
 }
 
 let player, enemy
@@ -326,6 +344,7 @@ function returnToMenu() {
 }
 
 function launchGame() {
+  applyStage(STAGES[Math.floor(Math.random() * STAGES.length)])
   startScreen.style.display   = 'none'
   gameContainer.style.display = 'flex'
   gameStarted  = true
@@ -711,11 +730,15 @@ function triggerUltimate(attackerId) {
   cumGif.src = gifSrc
   cumGif.style.display = 'block'
   ultFlash.classList.add('active')
+  fightMusic.volume = 0.12
+  playUltSfx()
 
   setTimeout(() => {
     ultFlash.classList.remove('active')
     cumGif.style.display = 'none'
     cumGif.src = ''
+    stopUltSfx()
+    fightMusic.volume = 0.4
 
     player.position.x = savedPlayerPos.x
     player.position.y = savedPlayerPos.y
@@ -990,7 +1013,26 @@ function resizeGame() {
 window.addEventListener('resize', resizeGame)
 resizeGame()
 
-document.querySelector('.game-wrapper').style.backgroundImage = `url(${BASE}img/background2.png)`
-document.querySelector('#shopGif').src = `${BASE}img/shop2.gif`
+const STAGES = [
+  { bg: `${BASE}img/background2.png`, shop: `${BASE}img/shop2.gif` },
+  { bg: `${BASE}img/background.jpeg`, shop: null },
+]
+
+const gameWrapper = document.querySelector('.game-wrapper')
+const shopGifEl   = document.querySelector('#shopGif')
+
+function applyStage(stage) {
+  gameWrapper.style.backgroundImage = `url(${stage.bg})`
+  if (stage.shop) {
+    shopGifEl.src = stage.shop
+    shopGifEl.style.display = 'block'
+  } else {
+    shopGifEl.src = ''
+    shopGifEl.style.display = 'none'
+  }
+}
+
+// Set initial stage (picked again on each launchGame)
+applyStage(STAGES[0])
 
 animate()
