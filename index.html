@@ -26,14 +26,16 @@
             <h3>PLAYER 1</h3>
             <p>Move: <span class="key">A</span> <span class="key">D</span></p>
             <p>Jump: <span class="key">W</span></p>
-            <p>Attack: <span class="key">SPACE</span></p>
+            <p>Attack 1: <span class="key">SPACE</span></p>
+            <p>Attack 2: <span class="key">E</span></p>
             <p>ULTIMATE: <span class="key">Q</span></p>
           </div>
           <div class="player-controls">
             <h3>PLAYER 2</h3>
             <p>Move: <span class="key">&larr;</span> <span class="key">&rarr;</span></p>
             <p>Jump: <span class="key">&uarr;</span></p>
-            <p>Attack: <span class="key">&darr;</span></p>
+            <p>Attack 1: <span class="key">&darr;</span></p>
+            <p>Attack 2: <span class="key">Enter</span></p>
             <p>ULTIMATE: <span class="key">/</span></p>
           </div>
         </div>
@@ -69,6 +71,25 @@
         </button>
       </div>
     </div>
+
+    <!-- Pane 4: Control Config Wizard -->
+    <div id="configPane" class="select-pane" style="display:none">
+      <h2 class="select-title">&#9881; CONFIGURE CONTROLS</h2>
+      <div class="config-box">
+        <div id="configPlayerBadge" class="config-player-badge p1">PLAYER 1</div>
+        <div id="configInstruction" class="config-instruction">---</div>
+        <div id="configDetected" class="config-detected"></div>
+        <div class="config-progress-track">
+          <div id="configProgressFill" class="config-progress-fill"></div>
+        </div>
+        <div id="configStepNum" class="config-step-num">1 / 14</div>
+      </div>
+      <p class="config-hint">BTN 2: skip step &nbsp;&nbsp;|&nbsp;&nbsp; BTN 9: previous step</p>
+      <button id="configBackBtn" class="neon-btn small">CANCEL</button>
+    </div>
+
+    <!-- Gear button fixed to screen corner, always visible in menus -->
+    <button id="configBtn" class="config-gear-btn">&#9881; CONFIG</button>
 
   </div>
 
@@ -138,7 +159,7 @@
       </div>
 
       <!-- Shop GIF (rendered as HTML so the browser anima it natively) -->
-      <img id="shopGif" src="/img/shop2.gif" alt="" class="shop-gif" />
+      <img id="shopGif" src="" alt="" class="shop-gif" />
 
       <!-- Canvas -->
       <canvas id="gameCanvas"></canvas>

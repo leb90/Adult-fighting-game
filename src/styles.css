@@ -129,9 +129,15 @@ body {
   100% { filter: hue-rotate(360deg); }
 }
 
-.neon-btn:hover {
+.neon-btn:hover,
+.neon-btn.gp-focus {
   transform: scale(1.05);
   box-shadow: 0 0 40px rgba(255, 0, 128, 0.6);
+}
+
+.neon-btn.gp-focus {
+  outline: 2px solid rgba(255, 0, 255, 0.9);
+  outline-offset: 3px;
 }
 
 .neon-btn.small {
@@ -708,6 +714,143 @@ body {
   image-rendering: pixelated;
   filter: blur(1.5px) brightness(0.85);
   opacity: 0.85;
+}
+
+/* Config wizard ─────────────────────────────────────────────────────────── */
+
+/* Gear button: positioned in startScreen corner (#startScreen is fixed inset:0) */
+.config-gear-btn {
+  position: absolute;
+  bottom: 24px;
+  right: 24px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: rgba(255, 255, 255, 0.4);
+  font-family: 'Press Start 2P', cursive;
+  font-size: 9px;
+  padding: 9px 16px;
+  cursor: pointer;
+  border-radius: 6px;
+  letter-spacing: 2px;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+  z-index: 10;
+}
+
+.config-gear-btn:hover {
+  background: rgba(255, 0, 255, 0.14);
+  border-color: rgba(255, 0, 255, 0.5);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* Config box: fixed dimensions so nothing shifts */
+.config-box {
+  width: 580px;
+  height: 290px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 0, 255, 0.22);
+  border-radius: 14px;
+  padding: 0 56px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.config-player-badge {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 4px;
+  padding: 5px 20px;
+  border-radius: 20px;
+  flex-shrink: 0;
+}
+
+.config-player-badge.p1 {
+  background: rgba(255, 0, 128, 0.15);
+  border: 1px solid rgba(255, 0, 128, 0.5);
+  color: #ff4da6;
+}
+
+.config-player-badge.p2 {
+  background: rgba(0, 255, 255, 0.1);
+  border: 1px solid rgba(0, 255, 255, 0.45);
+  color: #00ffff;
+}
+
+/* Fixed-height slots so box never jumps */
+.config-instruction {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 15px;
+  color: #fff;
+  letter-spacing: 2px;
+  line-height: 1.55;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.config-detected {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 10px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: rgba(0, 255, 136, 0.8);
+}
+
+.config-detected.detecting {
+  color: rgba(255, 210, 0, 0.75);
+  animation: cfg-pulse 0.85s ease-in-out infinite;
+}
+
+.config-detected.found {
+  color: #00ff88;
+  animation: none;
+}
+
+@keyframes cfg-pulse {
+  0%, 100% { opacity: 0.4; }
+  50%       { opacity: 1;   }
+}
+
+.config-progress-track {
+  width: 100%;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.config-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #ff0080 0%, #00ffff 100%);
+  border-radius: 2px;
+  transition: width 0.3s ease;
+  width: 0%;
+}
+
+.config-step-num {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.28);
+  flex-shrink: 0;
+}
+
+.config-hint {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 8px;
+  color: rgba(255, 255, 255, 0.22);
+  text-align: center;
+  line-height: 2;
 }
 
 /* Screen shake effect — usa translate individual para no pisar transform: scale() */

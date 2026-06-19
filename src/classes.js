@@ -112,6 +112,14 @@ export class Fighter extends Sprite {
     this.facingRight = facingRight
     this.flipped = false
     this.isAttacking = false
+    this.isAttacking2 = false
+    this.hitFlashTimer = 0
+    this.hitFlashPhase = 0  // 0=none  1=grayscale  2=white
+    this.hitstopTimer = 0
+    this.defaultFrameDuration = frameDuration
+    this.lastFrameHoldTimer = 0
+    this.attackAnimComplete = true
+    this.lastFrameHoldStarted = false
     this.health = 100
     this.framesCurrent = 0
     this.frameTime = 0
@@ -126,6 +134,9 @@ export class Fighter extends Sprite {
     this.ultimateDamage = 40
     this.ultimateCooldown = false
 
+    this.attack1HitFrame = sprites.attack1.hitFrame ?? 1
+    this.attack2HitFrame = sprites.attack2.hitFrame ?? 1
+
     this.comboCount = 0
     this.comboTimer = null
     this.lastHitTime = 0
@@ -136,16 +147,58 @@ export class Fighter extends Sprite {
     }
   }
 
+  draw(c) {
+    if (this.hitFlashPhase === 1) c.filter = 'grayscale(1) brightness(1.4)'
+    else if (this.hitFlashPhase === 2) c.filter = 'brightness(100)'
+    super.draw(c)
+    c.filter = 'none'
+  }
+
   update(c, deltaTime) {
     this.draw(c)
+
+    if (this.hitFlashTimer > 0) {
+      this.hitFlashTimer -= deltaTime
+      if (this.hitFlashTimer <= 0) {
+        this.hitFlashTimer = 0
+        this.hitFlashPhase = 0
+      } else if (this.hitFlashTimer <= 100) {
+        this.hitFlashPhase = 2
+      }
+    }
+
+    if (this.hitstopTimer > 0) {
+      this.hitstopTimer = Math.max(0, this.hitstopTimer - deltaTime)
+    }
+
+    if (this.lastFrameHoldTimer > 0) {
+      this.lastFrameHoldTimer = Math.max(0, this.lastFrameHoldTimer - deltaTime)
+      if (this.lastFrameHoldTimer === 0) {
+        this.attackAnimComplete = true
+        this.isAttacking = false
+        this.isAttacking2 = false
+      }
+    }
+
     if (!this.dead) {
       if (
         this.image === this.sprites.death.image &&
         this.framesCurrent === this.sprites.death.framesMax - 1
       ) {
         this.dead = true
-      } else {
-        this.animateFrames(deltaTime)
+      } else if (this.hitstopTimer <= 0) {
+        const isAttackAnim = this.image === this.sprites.attack1.image ||
+                             this.image === this.sprites.attack2.image
+        if (this.lastFrameHoldTimer > 0 || (isAttackAnim && this.attackAnimComplete)) {
+          // freeze: hold active, or hold done but idle hasn't taken over yet
+        } else {
+          this.animateFrames(deltaTime)
+          if (!this.attackAnimComplete && !this.lastFrameHoldStarted &&
+              isAttackAnim && this.framesCurrent === this.framesMax - 1) {
+            this.lastFrameHoldTimer = 150
+            this.lastFrameHoldStarted = true
+          }
+        }
       }
     }
 
@@ -173,8 +226,19 @@ export class Fighter extends Sprite {
   }
 
   attack() {
+    if (this.isAttacking2) return
     this.switchSprite('attack1')
     this.isAttacking = true
+    this.attackAnimComplete = false
+    this.lastFrameHoldStarted = false
+  }
+
+  attack2() {
+    if (this.isAttacking) return
+    this.switchSprite('attack2')
+    this.isAttacking2 = true
+    this.attackAnimComplete = false
+    this.lastFrameHoldStarted = false
   }
 
   useUltimate() {
@@ -199,8 +263,10 @@ export class Fighter extends Sprite {
     }
   }
 
-  takeHit(damage = 20) {
+  takeHit(damage = 10) {
     this.health -= damage
+    this.hitFlashTimer = 280
+    this.hitFlashPhase = 1
 
     if (this.health <= 0) {
       this.health = 0
@@ -215,10 +281,11 @@ export class Fighter extends Sprite {
       return
     }
 
-    if (
-      this.image === this.sprites.attack1.image &&
-      this.framesCurrent < this.sprites.attack1.framesMax - 1
-    ) {
+    if (this.image === this.sprites.attack1.image && !this.attackAnimComplete) {
+      return
+    }
+
+    if (this.image === this.sprites.attack2.image && !this.attackAnimComplete) {
       return
     }
 
@@ -227,6 +294,11 @@ export class Fighter extends Sprite {
       this.framesCurrent < this.sprites.takeHit.framesMax - 1
     ) {
       return
+    }
+
+    const spriteDef = this.sprites[sprite]
+    if (spriteDef) {
+      this.frameDuration = spriteDef.frameDuration ?? this.defaultFrameDuration
     }
 
     switch (sprite) {
@@ -262,6 +334,13 @@ export class Fighter extends Sprite {
         if (this.image !== this.sprites.attack1.image) {
           this.image = this.sprites.attack1.image
           this.framesMax = this.sprites.attack1.framesMax
+          this.framesCurrent = 0
+        }
+        break
+      case 'attack2':
+        if (this.image !== this.sprites.attack2.image) {
+          this.image = this.sprites.attack2.image
+          this.framesMax = this.sprites.attack2.framesMax
           this.framesCurrent = 0
         }
         break
